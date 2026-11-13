@@ -18,7 +18,7 @@ npm install
 npm run dev        # http://localhost:5173
 npm run build      # hasil statis di dist/
 npm run preview    # uji hasil build + service worker
-npm test           # 101 tes: core, data, app, arsitektur
+npm test           # tes otomatis: core, data, app, arsitektur
 npm run icons      # regenerasi ikon PWA (PNG dibuat tanpa library)
 ```
 
@@ -36,7 +36,7 @@ ui (React)  ──▶  app  ──▶  data  ──▶  core
 
 | Lapisan | Tanggung jawab | Larangan |
 | --- | --- | --- |
-| `src/core` | entitas transaksi, validasi, agregasi bulanan, format Rupiah, periode | React, DOM, storage, `Date.now()` |
+| `src/core` | entitas transaksi, validasi, agregasi dan analisis bulanan, format Rupiah, periode | React, DOM, storage, `Date.now()` |
 | `src/data` | adapter IndexedDB/memory/mirror, skema, migrasi, repository, backup | React, DOM |
 | `src/app` | satu store terpusat, actions (use case), selectors | React, DOM |
 | `src/ui` | React + Tailwind: view, komponen, hook store | akses `localStorage` langsung |
@@ -47,7 +47,7 @@ langsung menggagalkan `npm test`.
 
 ```
 src/
-├─ core/          transaction.js  summary.js  currency.js  period.js
+├─ core/          transaction.js  summary.js  analytics.js  currency.js  period.js
 ├─ data/          adapters/{idb,memory,mirror}.js  schema.js  migrations.js
 │                 repository.js  backup.js  storage.js  id.js
 ├─ app/           store.js  actions.js  selectors.js
@@ -90,6 +90,7 @@ tampilan selalu memakai index `by_month`.
 
 - Tambah, ubah, hapus transaksi (nominal, kategori, catatan, tanggal)
 - Ringkasan bulanan: masuk, keluar, saldo, pengeluaran teratas
+- **Analisis dasar:** tren 3/6/12 bulan, perbandingan pengeluaran, rata-rata bulanan, kategori terbesar, dan insight otomatis
 - Riwayat per bulan, dikelompokkan per tanggal, paginasi 50 baris
 - Kategori bawaan + kategori buatan sendiri (per jenis, tidak bisa duplikat)
 - Ekspor/impor cadangan JSON dengan mode **gabungkan** (merge by `id`, `updatedAt` terbaru menang)
@@ -192,8 +193,7 @@ Membersihkan data situs di Chrome akan menghapus database. Karena itu:
 
 ## 8. Privasi
 
-Tidak ada server, tidak ada akun, tidak ada analitik. Data tidak pernah keluar dari perangkat
-kecuali Anda sendiri mengekspornya.
+Tidak ada server, tidak ada akun, dan tidak ada layanan analitik pihak ketiga. Analisis keuangan dihitung lokal dari transaksi di perangkat. Data tidak pernah keluar dari perangkat kecuali Anda sendiri mengekspornya.
 
 ---
 
