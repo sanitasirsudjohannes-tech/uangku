@@ -3,6 +3,7 @@
  * repository, store, dan Storage API.
  */
 import { summarize, byCategory, groupByDate } from '../core/summary.js';
+import { analyzeTransactions, ANALYTICS_PERIODS } from '../core/analytics.js';
 import { addMonths, isValidMonthKey, monthKeyOf } from '../core/period.js';
 import { formatRupiah } from '../core/currency.js';
 import { backupFileName, buildBackup } from '../data/backup.js';
@@ -16,6 +17,7 @@ export const TABS = Object.freeze({
   SUMMARY: 'summary',
   HISTORY: 'history',
   SETTINGS: 'settings',
+  ANALYTICS: 'analytics',
 });
 
 const TOAST_MS = 3200;
@@ -32,6 +34,7 @@ const initialState = {
   summary: { income: 0, expense: 0, balance: 0, count: 0 },
   breakdown: [],
   groups: [],
+  analytics: { period: 6, loading: false, data: null, error: null },
   historyPage: 1,
   diagnostics: null,
   storage: {
@@ -55,6 +58,7 @@ export function createActions({ repo, store, now, today }) {
 
   let toastTimer = null;
   let toastSeq = 0;
+  let analyticsRequestId = 0;
 
   function toast(message, kind = 'info') {
     toastSeq += 1;
@@ -112,9 +116,59 @@ export function createActions({ repo, store, now, today }) {
     return diagnostics;
   }
 
+  async function loadAnalytics(period = get().analytics.period) {
+    const selectedPeriod = ANALYTICS_PERIODS.includes(period)
+      ? period
+      : get().analytics.period;
+    const endMonth = get().month;
+    if (!isValidMonthKey(endMonth)) return null;
+
+    const requestId = ++analyticsRequestId;
+    set({
+      analytics: {
+        ...get().analytics,
+        period: selectedPeriod,
+        loading: true,
+        data: null,
+        error: null,
+      },
+    });
+
+    try {
+      const monthKeys = Array.from({ length: selectedPeriod }, (_, index) =>
+        addMonths(endMonth, index - selectedPeriod + 1),
+      );
+      // Setiap bulan dibaca melalui indeks by_month, bukan memuat seluruh database.
+      const monthlyTransactions = await Promise.all(
+        monthKeys.map((month) => repo.listByMonth(month)),
+      );
+      const data = analyzeTransactions(monthlyTransactions.flat(), {
+        endMonth,
+        months: selectedPeriod,
+      });
+
+      if (requestId === analyticsRequestId) {
+        set({ analytics: { period: selectedPeriod, loading: false, data, error: null } });
+      }
+      return data;
+    } catch (error) {
+      if (requestId === analyticsRequestId) {
+        set({
+          analytics: {
+            ...get().analytics,
+            loading: false,
+            error: friendlyError(error),
+          },
+        });
+      }
+      return null;
+    }
+  }
+
   async function refresh() {
     const snapshot = await loadMonth(get().month);
     set({ ...snapshot, historyPage: 1 });
+    if (get().tab === TABS.ANALYTICS) await loadAnalytics();
     return snapshot;
   }
 
@@ -155,6 +209,7 @@ export function createActions({ repo, store, now, today }) {
     try {
       const snapshot = await loadMonth(month);
       set({ ...snapshot, historyPage: 1 });
+      if (get().tab === TABS.ANALYTICS) await loadAnalytics();
     } finally {
       set({ busy: false });
     }
@@ -173,6 +228,7 @@ export function createActions({ repo, store, now, today }) {
   function setTab(tab) {
     if (!Object.values(TABS).includes(tab)) return;
     set({ tab });
+    if (tab === TABS.ANALYTICS) return loadAnalytics();
   }
 
   function setHistoryPage(page) {
@@ -317,6 +373,7 @@ export function createActions({ repo, store, now, today }) {
     setMonth,
     shiftMonth,
     goToToday,
+    loadAnalytics,
     setTab,
     setHistoryPage,
     saveTransaction,

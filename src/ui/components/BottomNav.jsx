@@ -1,10 +1,11 @@
 import { useApp, useAppState } from '../context.jsx';
 import { TABS } from '../../app/actions.js';
-import { ListIcon, PlusIcon, SettingsIcon, WalletIcon } from './Icons.jsx';
+import { ChartIcon, ListIcon, PlusIcon, SettingsIcon, WalletIcon } from './Icons.jsx';
 
 const ITEMS = [
   { tab: TABS.SUMMARY, label: 'Ringkasan', Icon: WalletIcon },
   { tab: TABS.HISTORY, label: 'Riwayat', Icon: ListIcon },
+  { tab: TABS.ANALYTICS, label: 'Analisis', Icon: ChartIcon },
   { tab: TABS.SETTINGS, label: 'Pengaturan', Icon: SettingsIcon },
 ];
 

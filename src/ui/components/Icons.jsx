@@ -38,6 +38,15 @@ export const ListIcon = (props) => (
   </Svg>
 );
 
+export const ChartIcon = (props) => (
+  <Svg {...props}>
+    <path d="M4 19.5h16" />
+    <rect x="5.5" y="11" width="3.2" height="6.5" rx="0.8" />
+    <rect x="10.4" y="7.5" width="3.2" height="10" rx="0.8" />
+    <rect x="15.3" y="4.5" width="3.2" height="13" rx="0.8" />
+  </Svg>
+);
+
 export const SettingsIcon = (props) => (
   <Svg {...props}>
     <path d="M4 7h6.5M15.5 7H20M4 17h4.5M13.5 17H20" />
