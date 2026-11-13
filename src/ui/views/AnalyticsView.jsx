@@ -1,5 +1,5 @@
 import { useApp, useAppState } from '../context.jsx';
-import { formatRupiahCompact } from '../../core/currency.js';
+import { formatRupiah, formatRupiahCompact } from '../../core/currency.js';
 import { monthLabel } from '../../core/period.js';
 import { ANALYTICS_PERIODS } from '../../core/analytics.js';
 import AnalyticsCategories from '../components/AnalyticsCategories.jsx';
@@ -72,7 +72,7 @@ export default function AnalyticsView() {
                 <div key={metric.key} className={`card px-3.5 py-3 ${metric.key === 'balance' ? 'col-span-2' : ''}`}>
                   <p className="text-[0.66rem] font-bold uppercase tracking-wider text-muted">{metric.label}</p>
                   <p className={`tabular mt-1 text-lg font-extrabold ${metric.tone || (data.summary.balance < 0 ? 'text-expense' : 'text-ink')}`}>
-                    {formatRupiahCompact(data.summary[metric.key])}
+                    {metric.key === 'balance' ? formatRupiah(data.summary.balance) : formatRupiahCompact(data.summary[metric.key])}
                   </p>
                 </div>
               ))}
