@@ -69,7 +69,7 @@ test('arus kas seimbang tidak dilabeli sebagai surplus', () => {
 });
 
 test('periode dan bulan akhir yang tidak valid ditolak', () => {
-  assert.throws(() => analyzeTransactions([], { endMonth: '2026-13', months: 3 }), /bulan akhir/);
+  assert.throws(() => analyzeTransactions([], { endMonth: '2026-13', months: 3 }), /bulan akhir/i);
   assert.throws(() => analyzeTransactions([], { endMonth: '2026-11', months: 4 }), /3, 6, atau 12/);
 });
 
