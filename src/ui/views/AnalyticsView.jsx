@@ -4,6 +4,7 @@ import { monthLabel } from '../../core/period.js';
 import { ANALYTICS_PERIODS } from '../../core/analytics.js';
 import AnalyticsCategories from '../components/AnalyticsCategories.jsx';
 import AnalyticsInsights from '../components/AnalyticsInsights.jsx';
+import AnalyticsMonthlyExpense from '../components/AnalyticsMonthlyExpense.jsx';
 import AnalyticsTrend from '../components/AnalyticsTrend.jsx';
 
 const METRICS = [
@@ -65,6 +66,12 @@ export default function AnalyticsView() {
         </div>
       ) : data ? (
         <>
+          <AnalyticsMonthlyExpense
+            current={data.latest}
+            previous={data.previous}
+            changePercent={data.comparison.expenseChangePercent}
+          />
+
           <section className="mb-4">
             <h2 className="section-title">Ringkasan {data.months} bulan</h2>
             <div className="grid grid-cols-2 gap-2">
