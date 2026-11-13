@@ -39,6 +39,12 @@ function describeInsight(insight, categories) {
         title: 'Pengeluaran melebihi pemasukan',
         detail: `Selisih negatif ${formatRupiahCompact(insight.amount)} pada periode yang dipilih.`,
       };
+    case 'balanced-cashflow':
+      return {
+        icon: '⚖️',
+        title: 'Arus kas seimbang',
+        detail: 'Total pemasukan sama dengan total pengeluaran pada periode yang dipilih.',
+      };
     case 'positive-cashflow':
       return {
         icon: '🌱',
