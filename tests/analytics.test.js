@@ -24,7 +24,25 @@ test('analisis mengisi bulan kosong dan menghitung ringkasan periode', () => {
   assert.equal(result.summary.income, 15_000_000);
   assert.equal(result.summary.expense, 5_500_000);
   assert.equal(result.summary.balance, 9_500_000);
+  assert.equal(result.openingBalance, 0);
+  assert.deepEqual(result.trend.map((row) => row.balance), [4_000_000, 6_500_000, 9_500_000]);
+  assert.equal(result.closingBalance, 9_500_000);
   assert.equal(result.averages.expense, Math.round(5_500_000 / 3));
+});
+
+test('saldo kumulatif memperhitungkan transaksi sebelum periode grafik', () => {
+  const history = [
+    { id: 'old-income', type: 'income', amount: 3_000_000, categoryId: 'salary', month: '2026-08' },
+    { id: 'old-expense', type: 'expense', amount: 750_000, categoryId: 'food', month: '2026-08' },
+    ...transactions,
+  ];
+  const result = analyzeTransactions(history, { endMonth: '2026-11', months: 3 });
+
+  assert.equal(result.openingBalance, 2_250_000);
+  assert.equal(result.trend[0].balance, 6_250_000);
+  assert.equal(result.closingBalance, 11_750_000);
+  assert.equal(result.summary.income, 15_000_000);
+  assert.equal(result.summary.balance, 9_500_000);
 });
 
 test('analisis kategori mengurutkan pengeluaran dan menghitung proporsi', () => {
@@ -75,10 +93,14 @@ test('periode dan bulan akhir yang tidak valid ditolak', () => {
 
 test('actions mengambil bulan melalui repository dan menyimpan hasil di store', async () => {
   const calls = [];
+  const history = [
+    { id: 'old', type: 'income', amount: 2_000_000, categoryId: 'salary', month: '2026-08' },
+    ...transactions,
+  ];
   const repo = {
-    listByMonth: async (month) => {
-      calls.push(month);
-      return transactions.filter((item) => item.month === month);
+    listAll: async () => {
+      calls.push('all');
+      return history;
     },
   };
   const store = createStore({
@@ -95,15 +117,17 @@ test('actions mengambil bulan melalui repository dan menyimpan hasil di store', 
 
   const data = await actions.loadAnalytics(3);
 
-  assert.deepEqual(calls, ['2026-09', '2026-10', '2026-11']);
+  assert.deepEqual(calls, ['all']);
   assert.equal(data.summary.expense, 5_500_000);
+  assert.equal(data.openingBalance, 2_000_000);
+  assert.equal(data.closingBalance, 11_500_000);
   assert.equal(store.getState().analytics.loading, false);
   assert.equal(store.getState().analytics.period, 3);
   assert.equal(store.getState().analytics.data.summary.income, 15_000_000);
 });
 
 test('memilih tab analisis otomatis memuat data', async () => {
-  const repo = { listByMonth: async () => [] };
+  const repo = { listAll: async () => [] };
   const store = createStore({
     ...initialState,
     month: '2026-11',
