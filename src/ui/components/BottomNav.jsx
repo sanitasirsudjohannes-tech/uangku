@@ -68,7 +68,7 @@ function NavButton({ active, label, Icon, onClick }) {
       className={`nav-item ${active ? 'nav-item-active' : ''}`}
     >
       <Icon size={22} />
-      <span>{label}</span>
+      <span className="nav-label">{label}</span>
     </button>
   );
 }
