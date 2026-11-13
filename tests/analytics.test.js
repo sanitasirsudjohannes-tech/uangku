@@ -61,6 +61,16 @@ test('perbandingan bulan terakhir menggunakan baseline bulan sebelumnya', () => 
   assert.equal(result.insights.find((item) => item.type === 'expense-change').changePercent, -20);
 });
 
+test('ringkasan bulanan menyediakan pengeluaran bulan terpilih dan pembanding sebelumnya', () => {
+  const result = analyzeTransactions(transactions, { endMonth: '2026-11', months: 3 });
+
+  assert.equal(result.latest.month, '2026-11');
+  assert.equal(result.latest.expense, 2_000_000);
+  assert.equal(result.previous.month, '2026-10');
+  assert.equal(result.previous.expense, 2_500_000);
+  assert.equal(result.comparison.expenseChangePercent, -20);
+});
+
 test('rentang analisis melintasi pergantian tahun dengan benar', () => {
   const result = analyzeTransactions([], { endMonth: '2027-01', months: 3 });
   assert.deepEqual(result.monthKeys, ['2026-11', '2026-12', '2027-01']);
