@@ -86,6 +86,8 @@ export function analyzeTransactions(transactions = [], options = {}) {
 
     if (summary.balance < 0) {
       insights.push({ type: 'negative-cashflow', amount: Math.abs(summary.balance) });
+    } else if (summary.balance === 0 && summary.income > 0) {
+      insights.push({ type: 'balanced-cashflow' });
     } else if (summary.income > 0) {
       insights.push({
         type: 'positive-cashflow',
