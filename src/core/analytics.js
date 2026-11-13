@@ -13,8 +13,12 @@ function percentChange(current, previous) {
   return Math.round(((current - previous) / previous) * 1000) / 10;
 }
 
+function transactionMonth(item) {
+  return item.month ?? item.date?.slice(0, 7);
+}
+
 /**
- * @param {Array<object>} transactions
+ * @param {Array<object>} transactions All local transactions, including history before the selected period.
  * @param {{ endMonth:string, months?:3|6|12 }} options
  */
 export function analyzeTransactions(transactions = [], options = {}) {
@@ -31,21 +35,34 @@ export function analyzeTransactions(transactions = [], options = {}) {
   const monthKeys = Array.from({ length: months }, (_, index) =>
     addMonths(endMonth, index - months + 1),
   );
+  const startMonth = monthKeys[0];
   const includedMonths = new Set(monthKeys);
   const scopedTransactions = transactions.filter((item) =>
-    includedMonths.has(item.month ?? item.date?.slice(0, 7)),
+    includedMonths.has(transactionMonth(item)),
   );
+
+  // Saldo pembuka mengambil seluruh transaksi sebelum periode grafik.
+  // Ringkasan dan kategori tetap hanya menghitung periode yang dipilih.
+  const openingBalance = transactions.reduce((balance, item) => {
+    if (transactionMonth(item) >= startMonth) return balance;
+    if (item.type === TYPES.INCOME) return balance + item.amount;
+    if (item.type === TYPES.EXPENSE) return balance - item.amount;
+    return balance;
+  }, 0);
 
   const summary = summarize(scopedTransactions);
   const trendMap = new Map(
     monthlyTrend(scopedTransactions).map((row) => [row.month, row]),
   );
-  const trend = monthKeys.map((month) => ({
-    month,
-    income: trendMap.get(month)?.income ?? 0,
-    expense: trendMap.get(month)?.expense ?? 0,
-    net: trendMap.get(month)?.net ?? 0,
-  }));
+  let runningBalance = openingBalance;
+  const trend = monthKeys.map((month) => {
+    const monthly = trendMap.get(month);
+    const income = monthly?.income ?? 0;
+    const expense = monthly?.expense ?? 0;
+    const net = income - expense;
+    runningBalance += net;
+    return { month, income, expense, net, balance: runningBalance };
+  });
 
   const latest = trend[trend.length - 1];
   const previous = trend[trend.length - 2] ?? null;
@@ -98,11 +115,13 @@ export function analyzeTransactions(transactions = [], options = {}) {
   }
 
   return {
-    startMonth: monthKeys[0],
+    startMonth,
     endMonth,
     months,
     monthKeys,
     summary,
+    openingBalance,
+    closingBalance: latest.balance,
     trend,
     latest,
     previous,
