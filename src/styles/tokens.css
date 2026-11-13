@@ -1,0 +1,68 @@
+/* Token desain: satu-satunya tempat warna dan ukuran didefinisikan. */
+@theme {
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+    sans-serif;
+  --font-numeric: ui-monospace, "SF Mono", "Cascadia Mono", Consolas, monospace;
+
+  --color-bg: #f2f6f5;
+  --color-surface: #ffffff;
+  --color-surface-2: #eaf1ef;
+  --color-line: #dde7e4;
+  --color-ink: #10201d;
+  --color-muted: #5c706b;
+
+  --color-brand: #0f766e;
+  --color-brand-strong: #0b5d57;
+  --color-brand-soft: #d7eeea;
+  --color-brand-ink: #ffffff;
+
+  --color-income: #0c7a52;
+  --color-income-soft: #d9f2e6;
+  --color-expense: #c2415a;
+  --color-expense-soft: #fbe4e8;
+
+  --color-warn: #a55a07;
+  --color-warn-soft: #fdf0d8;
+
+  --color-hero-from: #0f766e;
+  --color-hero-to: #0b5a55;
+  --color-hero-ink: #ffffff;
+
+  --radius-card: 1.125rem;
+  --radius-pill: 999px;
+
+  --shadow-card: 0 1px 2px rgb(16 32 29 / 0.04), 0 8px 24px -12px rgb(16 32 29 / 0.18);
+  --shadow-sheet: 0 -8px 40px -12px rgb(16 32 29 / 0.35);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #08110f;
+    --color-surface: #0f1c19;
+    --color-surface-2: #16251f;
+    --color-line: #223430;
+    --color-ink: #e7f2ef;
+    --color-muted: #94aaa4;
+
+    --color-brand: #2dd4bf;
+    --color-brand-strong: #5eead4;
+    --color-brand-soft: #0e332d;
+    --color-brand-ink: #04211d;
+
+    --color-income: #34d399;
+    --color-income-soft: #0f2f25;
+    --color-expense: #fb7185;
+    --color-expense-soft: #341a22;
+
+    --color-warn: #fbbf24;
+    --color-warn-soft: #2e2410;
+
+    --color-hero-from: #123a33;
+    --color-hero-to: #0b2621;
+    --color-hero-ink: #e9f7f3;
+
+    --shadow-card: 0 1px 2px rgb(0 0 0 / 0.4), 0 10px 30px -16px rgb(0 0 0 / 0.7);
+    --shadow-sheet: 0 -8px 40px -8px rgb(0 0 0 / 0.65);
+  }
+}

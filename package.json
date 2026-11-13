@@ -1,0 +1,32 @@
+{
+  "name": "uangku",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Uangku - catatan keuangan pribadi, offline-first PWA",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "node --test \"tests/**/*.test.js\"",
+    "icons": "node scripts/generate-icons.mjs"
+  },
+  "imports": {
+    "#core/*": "./src/core/*",
+    "#data/*": "./src/data/*",
+    "#app/*": "./src/app/*",
+    "#ui/*": "./src/ui/*"
+  },
+  "dependencies": {
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.5",
+    "@vitejs/plugin-react": "^6.3.0",
+    "fake-indexeddb": "^6.2.8",
+    "tailwindcss": "^4.3.5",
+    "vite": "^8.3.8",
+    "vite-plugin-pwa": "^2.0.0"
+  }
+}

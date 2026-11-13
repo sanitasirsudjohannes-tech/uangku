@@ -1,0 +1,14 @@
+{
+  "app": "uangku",
+  "note": "TEMPLATE. Isi fingerprint dari PWABuilder, lalu letakkan sebagai .well-known/assetlinks.json di repo ROOT DOMAIN (sanitasirsudjohannes-tech.github.io), bukan di repo uangku. Lihat README bagian 6.",
+  "example": [
+    {
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "io.github.sanitasi.uangku",
+        "sha256_cert_fingerprints": ["GANTI_DENGAN_SHA256_FINGERPRINT_DARI_PWABUILDER"]
+      }
+    }
+  ]
+}

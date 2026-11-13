@@ -1,0 +1,127 @@
+/* Pola komponen yang muncul berulang, dibangun di atas utility Tailwind. */
+/* Basis tombol sebagai utility agar bisa dipakai ulang oleh @apply. */
+@utility btn {
+  display: inline-flex;
+  user-select: none;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 999px;
+  padding: 0.625rem 1rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 600;
+  transition-property:
+    color, background-color, border-color, box-shadow, transform, filter, opacity;
+  transition-duration: 150ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@layer components {
+  .app-shell {
+    @apply mx-auto flex min-h-dvh w-full max-w-md flex-col;
+  }
+
+  .card {
+    @apply rounded-card border border-line bg-surface shadow-card;
+  }
+
+  .btn:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+
+  .btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  .btn-primary {
+    @apply btn bg-brand text-brand-ink shadow-card hover:bg-brand-strong;
+  }
+
+  .btn-ghost {
+    @apply btn bg-surface-2 text-ink hover:bg-line;
+  }
+
+  .btn-quiet {
+    @apply btn bg-transparent text-muted hover:bg-surface-2 hover:text-ink;
+  }
+
+  .btn-danger {
+    @apply btn bg-expense-soft text-expense hover:brightness-95;
+  }
+
+  .field {
+    @apply w-full rounded-xl border border-line bg-surface-2 px-3.5 py-3 text-base
+      text-ink placeholder:text-muted/70 focus:border-brand focus:bg-surface
+      focus:outline-none focus:ring-2 focus:ring-brand/25;
+  }
+
+  .field-error {
+    @apply border-expense focus:border-expense focus:ring-expense/25;
+  }
+
+  .label {
+    @apply mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted;
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-pill border border-line bg-surface
+      px-3 py-2 text-sm font-medium text-ink transition active:scale-[0.97];
+  }
+
+  .chip-active {
+    @apply border-brand bg-brand-soft text-brand;
+  }
+
+  .amount-income {
+    @apply text-income;
+  }
+
+  .amount-expense {
+    @apply text-expense;
+  }
+
+  .section-title {
+    @apply mb-2.5 px-1 text-sm font-bold uppercase tracking-wider text-muted;
+  }
+
+  .divider {
+    @apply h-px w-full bg-line;
+  }
+
+  .sheet-panel {
+    @apply rounded-t-[1.75rem] border border-line bg-surface;
+    animation: sheet-up 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .toast {
+    animation: toast-in 200ms ease-out;
+  }
+
+  .screen-fade {
+    animation: fade-in 160ms ease-out;
+  }
+
+  .pop {
+    animation: pop-in 160ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .stat-bar {
+    @apply h-1.5 w-full overflow-hidden rounded-pill bg-surface-2;
+  }
+
+  .nav-item {
+    @apply flex flex-1 flex-col items-center gap-1 py-2 text-[0.68rem] font-semibold
+      text-muted transition;
+  }
+
+  .nav-item-active {
+    @apply text-brand;
+  }
+
+  .empty {
+    @apply flex flex-col items-center gap-3 rounded-card border border-dashed border-line
+      bg-surface/60 px-6 py-10 text-center;
+  }
+}
