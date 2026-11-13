@@ -11,15 +11,17 @@ const SERIES = [
 const WIDTH = 360;
 const HEIGHT = 184;
 const LEFT = 48;
-const RIGHT = 350;
+const RIGHT = 310;
 const TOP = 12;
 const BOTTOM = 140;
 
-function pointFor(index, value, count, minimum, maximum) {
-  const x = count <= 1 ? (LEFT + RIGHT) / 2 : LEFT + (index / (count - 1)) * (RIGHT - LEFT);
+function xFor(index, count) {
+  return count <= 1 ? (LEFT + RIGHT) / 2 : LEFT + (index / (count - 1)) * (RIGHT - LEFT);
+}
+
+function yFor(value, minimum, maximum) {
   const range = maximum - minimum || 1;
-  const y = BOTTOM - ((value - minimum) / range) * (BOTTOM - TOP);
-  return { x, y };
+  return BOTTOM - ((value - minimum) / range) * (BOTTOM - TOP);
 }
 
 function makePath(points) {
@@ -34,16 +36,31 @@ export default function AnalyticsTrend({ rows = [] }) {
   if (rows.length === 0) return null;
 
   const safeIndex = Math.min(activeIndex, rows.length - 1);
-  const values = rows.flatMap((row) => SERIES.map(({ key }) => row[key] ?? 0));
-  const minimum = Math.min(0, ...values);
-  const maximum = Math.max(1, ...values);
-  const ticks = Array.from({ length: 4 }, (_, index) =>
-    maximum - ((maximum - minimum) * index) / 3,
+  const flowMaximum = Math.max(1, ...rows.flatMap((row) => [row.income, row.expense]));
+  const balances = rows.map((row) => row.balance ?? 0);
+  const balanceMinimumRaw = Math.min(...balances);
+  const balanceMaximumRaw = Math.max(...balances);
+  const balancePadding = Math.max(
+    (balanceMaximumRaw - balanceMinimumRaw) * 0.08,
+    Math.max(Math.abs(balanceMinimumRaw), Math.abs(balanceMaximumRaw), 1) * 0.02,
   );
-  const points = Object.fromEntries(SERIES.map(({ key }) => [
-    key,
-    rows.map((row, index) => pointFor(index, row[key] ?? 0, rows.length, minimum, maximum)),
-  ]));
+  const balanceMinimum = balanceMinimumRaw - balancePadding;
+  const balanceMaximum = balanceMaximumRaw + balancePadding;
+  const flowTicks = Array.from({ length: 4 }, (_, index) => flowMaximum * (1 - index / 3));
+  const points = {
+    income: rows.map((row, index) => ({
+      x: xFor(index, rows.length),
+      y: yFor(row.income, 0, flowMaximum),
+    })),
+    expense: rows.map((row, index) => ({
+      x: xFor(index, rows.length),
+      y: yFor(row.expense, 0, flowMaximum),
+    })),
+    balance: rows.map((row, index) => ({
+      x: xFor(index, rows.length),
+      y: yFor(row.balance ?? 0, balanceMinimum, balanceMaximum),
+    })),
+  };
   const selected = rows[safeIndex];
 
   return (
@@ -65,13 +82,17 @@ export default function AnalyticsTrend({ rows = [] }) {
           role="group"
           aria-label="Grafik tren pemasukan, pengeluaran, dan saldo kumulatif. Sentuh titik untuk melihat nominal."
         >
-          {ticks.map((tick, index) => {
+          {flowTicks.map((tick, index) => {
             const y = TOP + (index / 3) * (BOTTOM - TOP);
+            const balanceTick = balanceMaximum - ((balanceMaximum - balanceMinimum) * index) / 3;
             return (
               <g key={index}>
                 <line x1={LEFT} x2={RIGHT} y1={y} y2={y} stroke="currentColor" opacity="0.12" strokeDasharray="3 4" />
                 <text x={LEFT - 7} y={y + 3} textAnchor="end" fill="currentColor" opacity="0.62" fontSize="8">
                   {formatRupiahCompact(tick)}
+                </text>
+                <text x={RIGHT + 6} y={y + 3} textAnchor="start" fill="currentColor" opacity="0.62" fontSize="8">
+                  {formatRupiahCompact(balanceTick)}
                 </text>
               </g>
             );
@@ -93,18 +114,15 @@ export default function AnalyticsTrend({ rows = [] }) {
           {rows.map((row, index) => (
             <g key={row.month}>
               {SERIES.map(({ key, color }) => {
-                const current = points[key][index];
+                const currentPoint = points[key][index];
                 const isSelected = index === safeIndex;
                 return (
                   <g key={key}>
-                    {isSelected ? <circle cx={current.x} cy={current.y} r="6" fill={color} opacity="0.16" /> : null}
                     <circle
-                      cx={current.x}
-                      cy={current.y}
-                      r={isSelected ? 3.5 : 2.5}
-                      fill={color}
-                      stroke="var(--color-surface)"
-                      strokeWidth="1.5"
+                      cx={currentPoint.x}
+                      cy={currentPoint.y}
+                      r="11"
+                      fill="transparent"
                       className="cursor-pointer"
                       role="button"
                       tabIndex={0}
@@ -116,6 +134,16 @@ export default function AnalyticsTrend({ rows = [] }) {
                           setActiveIndex(index);
                         }
                       }}
+                    />
+                    {isSelected ? <circle cx={currentPoint.x} cy={currentPoint.y} r="6" fill={color} opacity="0.16" pointerEvents="none" /> : null}
+                    <circle
+                      cx={currentPoint.x}
+                      cy={currentPoint.y}
+                      r={isSelected ? 3.5 : 2.5}
+                      fill={color}
+                      stroke="var(--color-surface)"
+                      strokeWidth="1.5"
+                      pointerEvents="none"
                     >
                       <title>{`${seriesLabel(key)}: ${formatRupiahCompact(row[key] ?? 0)}`}</title>
                     </circle>
@@ -143,7 +171,7 @@ export default function AnalyticsTrend({ rows = [] }) {
           </div>
         </div>
         <p className="mt-2 text-[0.62rem] leading-relaxed text-muted">
-          Saldo tercatat adalah akumulasi transaksi yang dimasukkan ke aplikasi, termasuk transaksi sebelum periode grafik. Angka ini bukan saldo rekening aktual.
+          Skala kiri untuk arus kas bulanan; skala kanan untuk saldo kumulatif. Saldo tercatat mencakup transaksi sebelum periode grafik dan bukan saldo rekening aktual.
         </p>
       </div>
     </section>
