@@ -135,14 +135,10 @@ export function createActions({ repo, store, now, today }) {
     });
 
     try {
-      const monthKeys = Array.from({ length: selectedPeriod }, (_, index) =>
-        addMonths(endMonth, index - selectedPeriod + 1),
-      );
-      // Setiap bulan dibaca melalui indeks by_month, bukan memuat seluruh database.
-      const monthlyTransactions = await Promise.all(
-        monthKeys.map((month) => repo.listByMonth(month)),
-      );
-      const data = analyzeTransactions(monthlyTransactions.flat(), {
+      // Saldo kumulatif membutuhkan transaksi sebelum awal periode.
+      // Database bersifat lokal/offline; listAll membaca IndexedDB tanpa mengubah data.
+      const allTransactions = await repo.listAll();
+      const data = analyzeTransactions(allTransactions, {
         endMonth,
         months: selectedPeriod,
       });
