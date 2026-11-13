@@ -58,6 +58,16 @@ test('transaksi di luar rentang tidak ikut dihitung', () => {
   assert.equal(result.summary.expense, 5_500_000);
 });
 
+test('arus kas seimbang tidak dilabeli sebagai surplus', () => {
+  const result = analyzeTransactions([
+    { id: 'a', type: 'income', amount: 100_000, categoryId: 'salary', month: '2026-11' },
+    { id: 'b', type: 'expense', amount: 100_000, categoryId: 'food', month: '2026-11' },
+  ], { endMonth: '2026-11', months: 3 });
+
+  assert.ok(result.insights.some((item) => item.type === 'balanced-cashflow'));
+  assert.ok(!result.insights.some((item) => item.type === 'positive-cashflow'));
+});
+
 test('periode dan bulan akhir yang tidak valid ditolak', () => {
   assert.throws(() => analyzeTransactions([], { endMonth: '2026-13', months: 3 }), /bulan akhir/);
   assert.throws(() => analyzeTransactions([], { endMonth: '2026-11', months: 4 }), /3, 6, atau 12/);
