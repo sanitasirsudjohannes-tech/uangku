@@ -24,7 +24,10 @@ export default function BottomNav() {
         <span
           aria-hidden="true"
           className="nav-indicator"
-          style={{ '--nav-index': activeIndex }}
+          style={{
+            '--nav-index': activeIndex,
+            '--nav-center-gap': activeIndex >= 2 ? '4rem' : '0px',
+          }}
         />
         <div className="flex flex-1 items-stretch">
           {ITEMS.slice(0, 2).map(({ tab, label, Icon }) => (
