@@ -30,7 +30,7 @@ export default function AnalyticsTrend({ rows = [] }) {
                   <div
                     aria-label={`Pemasukan ${formatRupiahCompact(row.income)}`}
                     title={`Pemasukan: ${formatRupiahCompact(row.income)}`}
-                    className="w-[min(34%,1rem)] rounded-t-sm bg-income transition-[height]"
+                    className="w-3 rounded-t-sm bg-income transition-[height]"
                     style={{ height: `${incomeHeight}%` }}
                   />
                   <div
