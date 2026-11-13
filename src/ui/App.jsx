@@ -5,6 +5,7 @@ import Toast from './components/Toast.jsx';
 import SummaryView from './views/SummaryView.jsx';
 import HistoryView from './views/HistoryView.jsx';
 import SettingsView from './views/SettingsView.jsx';
+import AnalyticsView from './views/AnalyticsView.jsx';
 import FormSheet from './views/FormSheet.jsx';
 import { TABS } from '../app/actions.js';
 
@@ -61,6 +62,8 @@ function AppShell() {
     content = <LoadingScreen />;
   } else if (state.tab === TABS.HISTORY) {
     content = <HistoryView />;
+  } else if (state.tab === TABS.ANALYTICS) {
+    content = <AnalyticsView />;
   } else if (state.tab === TABS.SETTINGS) {
     content = <SettingsView />;
   } else {
