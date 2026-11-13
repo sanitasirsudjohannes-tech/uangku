@@ -13,13 +13,19 @@ export default function BottomNav() {
   const { actions } = useApp();
   const state = useAppState();
   const { openForm } = useApp();
+  const activeIndex = Math.max(0, ITEMS.findIndex(({ tab }) => tab === state.tab));
 
   return (
     <nav
       aria-label="Navigasi utama"
       className="nav-height fixed inset-x-0 bottom-0 z-30 border-t border-line bg-surface/95 pb-safe backdrop-blur-lg"
     >
-      <div className="mx-auto flex h-full max-w-md items-stretch px-2">
+      <div className="relative mx-auto flex h-full max-w-md items-stretch px-2">
+        <span
+          aria-hidden="true"
+          className="nav-indicator"
+          style={{ '--nav-index': activeIndex }}
+        />
         <div className="flex flex-1 items-stretch">
           {ITEMS.slice(0, 2).map(({ tab, label, Icon }) => (
             <NavButton
