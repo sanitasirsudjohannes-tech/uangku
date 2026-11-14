@@ -1,4 +1,4 @@
-import { monthLabel, monthShortLabel } from '../../core/period.js';
+import { monthLabel } from '../../core/period.js';
 import { ChevronLeftIcon, ChevronRightIcon } from './Icons.jsx';
 
 export default function MonthPicker({ month, onPrev, onNext, onToday, isCurrentMonth, busy }) {
@@ -24,7 +24,7 @@ export default function MonthPicker({ month, onPrev, onNext, onToday, isCurrentM
             onClick={onToday}
             className="text-xs font-semibold text-brand underline decoration-dotted underline-offset-2"
           >
-            Kembali ke {monthShortLabel(month)} ini
+            Kembali ke bulan berjalan
           </button>
         ) : (
           <p className="text-xs text-muted">Bulan berjalan</p>
