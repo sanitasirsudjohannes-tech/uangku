@@ -96,10 +96,11 @@ export function createActions({ repo, store, now, today }) {
   }
 
   async function refreshDiagnostics() {
-    const [persisted, estimate, diagnostics] = await Promise.all([
+    const [persisted, estimate, diagnostics, mirror] = await Promise.all([
       getPersistedStatus(),
       getStorageEstimate(),
       repo.diagnostics(),
+      repo.mirrorSnapshot(),
     ]);
 
     set({
@@ -110,7 +111,7 @@ export function createActions({ repo, store, now, today }) {
         usage: estimate.usage,
         quota: estimate.quota,
         lastBackupAt: diagnostics.lastBackupAt,
-        mirror: repo.mirrorSnapshot() ? { present: true } : { present: false },
+        mirror: mirror ? { present: true } : { present: false },
       },
     });
     return diagnostics;
@@ -182,7 +183,7 @@ export function createActions({ repo, store, now, today }) {
       await requestPersistence().catch(() => null);
 
       // Jika database kosong tapi ada cermin cadangan, beri tahu pengguna.
-      const mirrorData = repo.mirrorSnapshot();
+      const mirrorData = await repo.mirrorSnapshot();
       if (notes.seededCategories && mirrorData?.transactions?.length) {
         set({
           storage: { ...get().storage, mirror: { present: true, transactions: mirrorData.transactions.length } },

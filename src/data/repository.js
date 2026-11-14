@@ -224,13 +224,9 @@ export function createRepository({ adapter, mirror = null, makeId, now }) {
     const current = await snapshot();
     const categories = mergeRecords(current.categories, incoming.categories);
 
-    let transactions;
-    if (mode === 'replace') {
-      await adapter.clear(STORES.TRANSACTIONS);
-      transactions = { items: incoming.transactions, added: incoming.transactions.length, updated: 0, kept: 0 };
-    } else {
-      transactions = mergeRecords(current.transactions, incoming.transactions);
-    }
+    const transactions = mode === 'replace'
+      ? { items: incoming.transactions, added: incoming.transactions.length, updated: 0, kept: 0 }
+      : mergeRecords(current.transactions, incoming.transactions);
 
     const validCategoryIds = new Set([...categories.items].map((row) => row.id));
     const orphans = transactions.items.filter((row) => !validCategoryIds.has(row.categoryId));
@@ -240,6 +236,10 @@ export function createRepository({ adapter, mirror = null, makeId, now }) {
         `Ada ${orphans.length} transaksi dengan kategori yang tidak ditemukan di cadangan.`,
       );
     }
+
+    // Hapus transaksi lama hanya setelah cadangan lolos validasi,
+    // supaya impor yang gagal tidak menghilangkan data yang sudah ada.
+    if (mode === 'replace') await adapter.clear(STORES.TRANSACTIONS);
 
     await adapter.bulkPut(STORES.CATEGORIES, categories.items);
     await adapter.bulkPut(STORES.TRANSACTIONS, transactions.items);

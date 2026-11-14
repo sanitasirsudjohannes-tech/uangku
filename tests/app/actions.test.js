@@ -163,6 +163,49 @@ test('diagnostics terisi setelah refresh', async () => {
   assert.equal(store.getState().storage.supported, false);
 });
 
+test('init menunggu cermin cadangan dan melaporkan statusnya dengan benar', async () => {
+  const mirror = {
+    available: () => true,
+    save: async () => ({ saved: true }),
+    load: () => ({ transactions: [{ id: 'tx_lama' }], categories: [] }),
+    status: () => ({}),
+  };
+  const store = createStore({ ...initialState });
+  const actions = createActions({
+    repo: makeRepo({ mirror }),
+    store,
+    now: () => NOW,
+    today: () => TODAY,
+  });
+
+  await actions.init();
+
+  const state = store.getState();
+  assert.equal(state.storage.mirror.present, true);
+  assert.equal(state.storage.mirror.transactions, 1);
+  assert.equal(state.toast?.kind, 'warn');
+});
+
+test('diagnostics melaporkan cermin yang tidak ada sebagai tidak ada', async () => {
+  const mirror = {
+    available: () => true,
+    save: async () => ({ saved: true }),
+    load: () => null,
+    status: () => ({}),
+  };
+  const store = createStore({ ...initialState });
+  const actions = createActions({
+    repo: makeRepo({ mirror }),
+    store,
+    now: () => NOW,
+    today: () => TODAY,
+  });
+
+  await actions.init();
+
+  assert.equal(store.getState().storage.mirror.present, false);
+});
+
 test('selector riwayat dan kategori teratas bekerja di atas state', async () => {
   const { store, actions } = setup();
   await actions.init();

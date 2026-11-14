@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { formatRupiahCompact } from '../../core/currency.js';
 import { monthShortLabel } from '../../core/period.js';
 
@@ -33,6 +33,12 @@ function makePath(points) {
 export default function AnalyticsTrend({ rows = [] }) {
   const [activeIndex, setActiveIndex] = useState(Math.max(0, rows.length - 1));
 
+  // Saat rentang analisis berganti, pilih kembali bulan terakhir agar panel
+  // detail tidak menampilkan indeks lama dari rentang sebelumnya.
+  useEffect(() => {
+    if (rows.length > 0) setActiveIndex(rows.length - 1);
+  }, [rows]);
+
   if (rows.length === 0) return null;
 
   const safeIndex = Math.min(activeIndex, rows.length - 1);
@@ -46,7 +52,9 @@ export default function AnalyticsTrend({ rows = [] }) {
   );
   const balanceMinimum = balanceMinimumRaw - balancePadding;
   const balanceMaximum = balanceMaximumRaw + balancePadding;
-  const flowTicks = Array.from({ length: 4 }, (_, index) => flowMaximum * (1 - index / 3));
+  const flowTicks = Array.from({ length: 4 }, (_, index) =>
+    Math.round(flowMaximum * (1 - index / 3)),
+  );
   const points = {
     income: rows.map((row, index) => ({
       x: xFor(index, rows.length),
@@ -126,7 +134,7 @@ export default function AnalyticsTrend({ rows = [] }) {
                       className="cursor-pointer"
                       role="button"
                       tabIndex={0}
-                      aria-label={`${seriesLabel(key)} ${monthShortLabel(row.month)}: ${formatRupiahCompact(row[key] ?? 0)}`}
+                      aria-label={`${seriesLabel(key)} (${seriesScale(key)}) ${monthShortLabel(row.month)}: ${formatRupiahCompact(row[key] ?? 0)}`}
                       onClick={() => setActiveIndex(index)}
                       onKeyDown={(event) => {
                         if (event.key === 'Enter' || event.key === ' ') {
@@ -145,7 +153,7 @@ export default function AnalyticsTrend({ rows = [] }) {
                       strokeWidth="1.5"
                       pointerEvents="none"
                     >
-                      <title>{`${seriesLabel(key)}: ${formatRupiahCompact(row[key] ?? 0)}`}</title>
+                      <title>{`${seriesLabel(key)} (${seriesScale(key)}): ${formatRupiahCompact(row[key] ?? 0)}`}</title>
                     </circle>
                   </g>
                 );
@@ -162,7 +170,9 @@ export default function AnalyticsTrend({ rows = [] }) {
           <div className="grid grid-cols-3 gap-2">
             {SERIES.map(({ key, label, color }) => (
               <div key={key} className="min-w-0">
-                <p className="truncate text-[0.6rem] font-medium text-muted">{label}</p>
+                <p className="truncate text-[0.6rem] font-medium text-muted" title={seriesScale(key)}>
+                  {label}
+                </p>
                 <p className="truncate text-xs font-bold tabular" style={{ color }}>
                   {formatRupiahCompact(selected[key] ?? 0)}
                 </p>
@@ -180,4 +190,8 @@ export default function AnalyticsTrend({ rows = [] }) {
 
 function seriesLabel(key) {
   return SERIES.find((series) => series.key === key)?.label ?? key;
+}
+
+function seriesScale(key) {
+  return key === 'balance' ? 'saldo kumulatif, skala kanan' : 'arus kas bulanan, skala kiri';
 }

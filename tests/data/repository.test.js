@@ -182,6 +182,35 @@ test('import menolak cadangan dengan kategori yatim', async () => {
   await assert.rejects(() => repo.importBackup(broken), /kategori yang tidak ditemukan/);
 });
 
+test('import replace yang gagal tidak menghapus transaksi lama', async () => {
+  const repo = makeRepo();
+  await repo.init();
+  await repo.create(baseInput);
+  const backup = await repo.exportBackup();
+  const broken = {
+    ...backup,
+    transactions: [
+      {
+        id: 'tx_x',
+        type: 'expense',
+        amount: 1000,
+        categoryId: 'cat_tidak_ada',
+        note: '',
+        date: '2026-11-13',
+        month: '2026-11',
+        createdAt: '2026-11-13T00:00:00.000Z',
+        updatedAt: '2026-11-13T00:00:00.000Z',
+      },
+    ],
+  };
+
+  await assert.rejects(
+    () => repo.importBackup(broken, { mode: 'replace' }),
+    /kategori yang tidak ditemukan/,
+  );
+  assert.equal((await repo.listAll()).length, 1);
+});
+
 test('cermin localStorage menerima snapshot setelah perubahan', async () => {
   const saves = [];
   const mirror = {

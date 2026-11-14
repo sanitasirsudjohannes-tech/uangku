@@ -10,7 +10,7 @@ import { PlusIcon } from '../components/Icons.jsx';
 export default function HistoryView() {
   const { actions, openForm } = useApp();
   const state = useAppState();
-  const { month, today, categories, busy, historyPage } = state;
+  const { month, today, categories, busy } = state;
   const isCurrentMonth = month === monthKeyOf(today);
 
   const page = selectHistory(state);
@@ -92,7 +92,7 @@ export default function HistoryView() {
             Sebelumnya
           </button>
           <span className="shrink-0 text-xs font-semibold text-muted">
-            {historyPage} / {page.pageCount}
+            {page.page} / {page.pageCount}
           </span>
           <button
             type="button"
